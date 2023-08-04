@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body>
+  <!-- Header -->
+  <script>
+    // Check if the token exists in localStorage
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "login.html";
+    }
+    
+    // Open Side Navigation Bar
+    function openNav() {
+      document.getElementById("mySidenav").style.width = "280px";
+    }
+
+    // Close Side Navigation Bar
+    function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+    }
+
+    // Logout and clear data from local storage
+    function logout() {
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <nav class="navbar">
+    <div id="mySidenav" class="sidenav">
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+      <a href="createaccount.html">Create User Account</a>
+      <a href="manageaccount.html">User Account Management</a>
+      <a href="itemsales.html">Item Sales Performance</a>
+      <a href="salesperformance.html">Salesman Sales Performance</a>
+      <a href="updatepassword.html">Update Password</a>
+      <a href="userhome.html">Switch to User Panel</a>
+    </div>
+    <span class="open" onclick="openNav()">&nbsp&nbsp&#9776;&nbsp&nbsp
+      <div class="logo">
+        <a href="">
+          <img src="assets/sale-sign.png" alt="SDS_logo">
+          <span>&nbsp&nbspSALES PILOT&nbsp&nbsp</span>
+          <img src="assets/cashier-machine.png" alt="SDS_logo">
+        </a>
+      </div>
+    </span>
+    <a class="logout" href="#" onclick="logout()">Log Out&nbsp&nbsp</a>
+  </nav>
+
+  <table class="adminHome">
+    <tr>
+      <th>
+        <button type="button" onclick="window.location.href='createaccount.html'">
+          <img src="assets/profile-user.png" width="80" height="80"><br>Create User Account
+        </button>
+      </th>
+      <th>
+        <button type="button" onclick="window.location.href='manageaccount.html'">
+          <img src="assets/edit.png" width="80" height="80"><br>User Account Management
+        </button>
+      </th>
+      <th>
+        <button type="button" onclick="window.location.href='itemsales.html'">
+          <img src="assets/sales.png" width="80" height="80"><br>Item Sales Performance
+        </button>
+      </th>
+      <th>
+        <button type="button" onclick="window.location.href='salesperformance.html'">
+          <img src="assets/salesman.png" width="80" height="80"><br>Salesman Sales Performance
+        </button>
+      </th>
+    </tr>
+  </table>
+</body>
+</html>

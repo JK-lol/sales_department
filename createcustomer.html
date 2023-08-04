@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Create Customer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <nav class="navbar">
+    <div id="mySidenav" class="sidenav">
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+      <a href="userhome.html">Home</a>
+      <a href="managecustomer.html">Customer Management</a>
+      <a href="transaction.html">Transaction</a>
+      <a href="manageitem.html">Stock Management</a>
+      <a href="updatepassword.html">Update Password</a>
+    </div>
+    <span class="open" onclick="openNav()">&nbsp&nbsp&#9776;&nbsp&nbsp
+      <div class="logo">
+        <a href="">
+          <img src="assets/sale-sign.png" alt="SDS_logo">
+          <span>&nbsp&nbspSALES PILOT&nbsp&nbsp</span>
+          <img src="assets/cashier-machine.png" alt="SDS_logo">
+        </a>
+      </div>
+    </span>
+    <a class="logout" href="#" onclick="logout()">Log Out&nbsp&nbsp</a>
+  </nav>
+
+    <form id="customerForm">
+      <table class="createCust">
+        <caption>Create Customer</caption>
+        <tr>
+          <td><label for="customer_name">Customer Name:</label></td>
+          <td><input type="text" id="customer_name" name="customer_name" required></td>
+        </tr>
+        <tr>
+          <td><label for="customer_contact">Customer Contact:</label></td>
+          <td><input type="text" id="customer_contact" name="customer_contact" required></td>
+        </tr>
+        <tr>
+          <td><label for="customer_email">Customer Email:</label></td>
+          <td><input type="email" id="customer_email" name="customer_email" required></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><button type="submit">Create Customer</button><br></td>
+        </tr>
+      </table>
+    </form>
+  
+  <div id="result"></div>
+
+  <script>
+    // Open Side Navigation Bar
+    function openNav() {
+      document.getElementById("mySidenav").style.width = "280px";
+    }
+
+    // Close Side Navigation Bar
+    function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "login.html";
+    }
+    document.getElementById('customerForm').addEventListener('submit', createCustomer);
+  
+    async function createCustomer(event) {
+      event.preventDefault();
+  
+      const form = event.target;
+      const customer_name = form.elements.customer_name.value;
+      const customer_contact = form.elements.customer_contact.value;
+      const customer_email = form.elements.customer_email.value;
+  
+      const payload = { customer_name, customer_contact, customer_email };
+  
+      try {
+        const response = await fetch('http://localhost:3000/api/customer', {
+          method: 'POST',
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+  
+        if (response.ok) {
+          const responseData = await response.json();
+          alert("Customer created successfully");
+          location.reload();
+          window.location.href='managecustomer.html';
+        } else {
+          const errorData = await response.json();
+          const errorMessage = errorData.errors[0].msg;
+          alert(`Error creating customer: ${errorMessage}`);
+          location.reload();
+          window.location.href='managecustomer.html';
+        }
+      } catch (error) {
+        console.error(error);
+        alert('An error occurred while creating the customer.');
+        location.reload();
+        window.location.href='managecustomer.html';
+      }
+    }
+  </script>
+  
+</body>
+</html>

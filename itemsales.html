@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Item Sales Report</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body>
+  <nav class="navbar">
+    <div id="mySidenav" class="sidenav">
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+      <a href="adminhome.html">Home</a>
+      <a href="createaccount.html">Create User Account</a>
+      <a href="manageaccount.html">User Account Management</a>
+      <a href="itemsales.html">Item Sales Performance</a>
+      <a href="salesperformance.html">Salesman Sales Performance</a>
+      <a href="updatepassword.html">Update Password</a>
+      <a href="userhome.html">Switch to User Panel</a>
+    </div>
+    <span class="open" onclick="openNav()">&nbsp&nbsp&#9776;&nbsp&nbsp
+      <div class="logo">
+        <a href="">
+          <img src="assets/sale-sign.png" alt="SDS_logo">
+          <span>&nbsp&nbspSALES PILOT&nbsp&nbsp</span>
+          <img src="assets/cashier-machine.png" alt="SDS_logo">
+        </a>
+      </div>
+    </span>
+    <a class="logout" href="#" onclick="logout()">Log Out&nbsp&nbsp</a>
+  </nav>
+  
+  <table id="itemSalesTable">
+    <caption>Item Sales Report</caption>
+    <thead>
+      <tr class="item-title">
+        <th style="width: 50%;">Item Name</th>
+        <th style="width: 25%;">Item Type</th>
+        <th style="width: 25%;">Quantity Sold</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  
+  <script>
+    // Open Side Navigation Bar
+    function openNav() {
+      document.getElementById("mySidenav").style.width = "280px";
+    }
+
+    // Close Side Navigation Bar
+    function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+    }
+
+    // Logout and clear data from local storage
+    function logout() {
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "login.html";
+    }
+
+    const headers = {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    };
+    // Fetch the data from the API endpoint
+    fetch("http://localhost:3000/api/report/itemSales", { headers:headers })
+      .then(response => response.json())
+      .then(data => {
+        // Get the table body element
+        const tableBody = document.querySelector("#itemSalesTable tbody");
+  
+        // Loop through the data and create table rows
+        data.forEach(row => {
+          const newRow = document.createElement("tr");
+          newRow.innerHTML = `
+            <td>${row.item_name}</td>
+            <td>${row.item_type}</td>
+            <td>${row["Item sold"]}</td>
+          `;
+          tableBody.appendChild(newRow);
+        });
+      })
+      .catch(error => console.log(error));
+  </script>
+</body>
+</html>

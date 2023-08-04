@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Create Invoice Detail</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" type="text/css" href="styles.css">
+
+  <!-- <script src="transaction.js" defer></script> -->
+</head>
+
+<body>
+  <nav class="navbar">
+    <div id="mySidenav" class="sidenav">
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+      <a href="userhome.html">Home</a>
+      <a href="managecustomer.html">Customer Management</a>
+      <a href="transaction.html">Transaction</a>
+      <a href="manageitem.html">Stock Management</a>
+      <a href="updatepassword.html">Update Password</a>
+    </div>
+    <span class="open" onclick="openNav()">&nbsp&nbsp&#9776;&nbsp&nbsp
+      <div class="logo">
+        <a href="">
+          <img src="assets/sale-sign.png" alt="SDS_logo">
+          <span>&nbsp&nbspSALES PILOT&nbsp&nbsp</span>
+          <img src="assets/cashier-machine.png" alt="SDS_logo">
+        </a>
+      </div>
+    </span>
+    <a class="logout" href="#" onclick="logout()">Log Out&nbsp&nbsp</a>
+  </nav>
+
+    <form id="invoiceForm">
+      <table class="transaction-func">
+        <caption>Transaction</caption>
+        <tr>
+          <td>
+            <button onclick="window.location.href='userhome.html'" class="go-back">
+              <img src="assets/back.png" width="20" height="20">&nbsp&nbspMain Menu
+            </button>
+          </td>
+          <td>
+            <form id="invoiceForm">
+              <label for="customerEmailInput" >Customer Email:&nbsp&nbsp</label>
+              <input type="text" id="customerEmailInput" required>
+            </form>
+          </td>
+          <td></td>
+        </tr>
+      </table>
+      
+      <table class="transaction">
+        <thead>
+          <tr class="transaction-title">
+            <th>Item ID</th>
+            <th>Purchase Quantity</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceBody">
+          <tr>
+            <td><input type="number" class="itemIDInput"></td>
+            <td><input type="number" class="purchaseQtyInput"></td>
+            <td><button class="delete-button">Delete</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="transaction-Btn">
+        <tr>
+          <th style="width: 50%;">
+            <button id="addNewRowBtn" onclick="addRow()">Add New Row</button>
+          </th>
+          <th style="width: 50%;">
+            <button type="submit" class="submit-trans">Submit</button>
+          </th>
+        </tr>
+      </table>
+    </form>
+  
+  <div id="result"></div>
+  
+</body>
+
+<script>
+  // Open Side Navigation Bar
+  function openNav() {
+      document.getElementById("mySidenav").style.width = "280px";
+    }
+
+    // Close Side Navigation Bar
+    function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+    }
+
+    // Logout and clear data from local storage
+    function logout() {
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    }
+
+  let currentRow;
+  const customerEmailInput = document.getElementById('customerEmailInput')
+  const addNewRowBtn = document.getElementById('addNewRowBtn')
+  const invoiceBody = document.getElementById('invoiceBody')
+  const invoiceForm = document.getElementById('invoiceForm')
+
+
+
+  function updateButtonOnclick() {
+      // let content
+      Array.from(invoiceBody.querySelectorAll(`tr`)).forEach((e, i) => {
+          
+          e.querySelector('td > button').onclick = () => {removeRow(i+1)}
+      })
+  }
+
+  function removeRow(i) {
+      let rowLength = Array.from(document.querySelectorAll(`#invoiceBody tr`)).length
+      if (rowLength <= 1) return 
+      document.querySelector(`#invoiceBody tr:nth-child(${i})`).remove()
+      updateButtonOnclick()
+      
+  }
+
+  function addRow() {
+      let tr = document.createElement('tr');
+
+      let itemIDCell = document.createElement('td');
+      let itemIDInput = document.createElement('input');
+      itemIDInput.type = 'number';
+      itemIDInput.required = true;
+      itemIDInput.setAttribute('class', 'itemIDInput');
+      
+      itemIDCell.appendChild(itemIDInput);
+      
+      let purchaseQtyCell = document.createElement('td');
+      let purchaseQtyInput = document.createElement('input');
+      purchaseQtyInput.type = 'number';
+      purchaseQtyInput.required = true;
+      
+      purchaseQtyInput.setAttribute('class', 'purchaseQtyInput');
+      purchaseQtyCell.appendChild(purchaseQtyInput);
+      
+      let removeCell = document.createElement('td');
+      let removeBtn = document.createElement('button');
+      removeBtn.innerText = 'Delete';
+      removeBtn.setAttribute('class', 'delete-button'); // Add CSS class to the button
+      removeCell.appendChild(removeBtn);
+
+      tr.append(itemIDCell);
+      tr.append(purchaseQtyCell);
+      tr.append(removeCell);
+
+      invoiceBody.appendChild(tr);
+      updateButtonOnclick();
+  }
+
+  async function fetchCurrentRow() {
+      let response = await fetch('http:///localhost:3000/api/invoice')
+      let json = await response.json();
+      console.log(json)
+      currentRow = json[0].total_rows;
+  }
+
+  window.onload = function (e) {
+      fetchCurrentRow()
+      updateButtonOnclick()
+  }
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+      window.location.href = "login.html";
+  }
+
+  async function createInvoiceDetail() {
+      let customerEmail = customerEmailInput.value
+      let itemIDInputs = Array.from(document.getElementsByClassName('itemIDInput'))
+      let purchaseQtyInputs = Array.from(document.getElementsByClassName('purchaseQtyInput'))
+
+      let length = itemIDInputs.length
+      try {
+          for(let i = 0;i < length;i++) {
+              console.log(i)
+              let item_id = itemIDInputs[i].value;
+              let purchase_qty = purchaseQtyInputs[i].value;
+              let customer_email = customerEmail;
+              let invoice_id = currentRow + 1;
+              const formData = new FormData();
+              
+              const payload = { invoice_id, item_id, purchase_qty, customer_email };
+
+              const response = await fetch('http://localhost:3000/api/invoice_detail', {
+              method: 'POST',
+              headers: {
+                  "Authorization": `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(payload)
+              })
+              console.log(response)
+              if (response.ok) {
+                      const responseData = await response.json();
+                      alert("Invoice detail created successfully!");
+                      location.reload();
+                  } else {
+                      const errorData = await response.json();
+                      const errorMessage = errorData.errors[0].msg;
+                      alert(`Error creating invoice detail: ${errorMessage}`);
+                      location.reload();
+                  }
+          }
+              
+      } catch (error) {
+          console.log(error)
+      }
+  }
+
+  invoiceForm.onsubmit = function(e) {
+      createInvoiceDetail()
+      e.preventDefault();
+      console.log("submitting")
+}
+</script>
+
+</html>
